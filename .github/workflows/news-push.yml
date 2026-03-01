@@ -16,12 +16,13 @@ jobs:
         
       - name: Send to WhatsApp
         run: |
-          # 提取变量
+          # 1. 提取变量并清理掉可能导致 JSON 格式损坏的字符
           REPO="${{ github.repository }}"
-          MSG=$(echo "${{ github.event.head_commit.message }}" | tr -d '"' | tr -d "'")
+          # 清除提交信息中的换行和特殊引号，确保字符串安全
+          MSG=$(echo "${{ github.event.head_commit.message }}" | tr -d '\n' | tr -d '"' | tr -d "'")
           
-          # 【核心修改】按照文档要求构造 JSON 指令包
-          # 必须包含 message, deliver, channel, to 字段
+          # 2. 构造 OpenClaw /hooks/agent 要求的直接指令包
+          # 确保字段名称与文档提供的 "deliver", "channel", "to" 一致
           JSON=$(jq -n \
             --arg msg "🚀 GitHub更新
           仓库: $REPO
@@ -36,9 +37,10 @@ jobs:
               to: $to
             }')
           
-          echo "Sending Targeted Command to OpenClaw Agent..."
+          echo "Sending command to OpenClaw via /hooks/agent..."
           
-          # 使用 /hooks/agent 路径，不再需要 X-GitHub-Event 伪装头
+          # 3. 发送 POST 请求
+          # 此时不再需要 X-GitHub-Event，因为它不再是伪装 Webhook，而是直接 API 调用
           curl -X POST "https://gh.mxaly.top:16666/hooks/agent" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.OPENCLAW_TOKEN }}" \
