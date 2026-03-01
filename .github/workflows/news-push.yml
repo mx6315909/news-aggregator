@@ -35,7 +35,7 @@ jobs:
           echo "Sending payload..."
           
           # 加上了 -H "Authorization: Bearer ..." 这一行
-          curl -X POST "https://gh.mxaly.top:16666/webhook" \
+          curl -X POST "https://gh.mxaly.top:16666/github-webhook" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.OPENCLAW_TOKEN }}" \
             -d "$JSON"
