@@ -19,7 +19,8 @@ jobs:
           # 提取变量
           REPO="${{ github.repository }}"
           ACTOR="${{ github.actor }}"
-          MSG="${{ github.event.head_commit.message }}"
+          # 获取提交信息并简单处理掉可能导致 JSON 出错的特殊字符
+          MSG=$(echo "${{ github.event.head_commit.message }}" | tr -d '"' | tr -d "'")
           
           # 使用 jq 构建标准的 JSON
           JSON=$(jq -n \
@@ -32,10 +33,11 @@ jobs:
           🤓来自你的小弟" \
             '{channel: $ch, target: $tg, message: $msg}')
           
-          echo "Sending payload..."
+          echo "Sending payload to OpenClaw Backend..."
           
-          # 加上了 -H "Authorization: Bearer ..." 这一行
-          curl -X POST "https://gh.mxaly.top:16666/github-webhook" \
+          # 注意：路径改回了 /api/message
+          # 确保你的 Lucky 目标地址是 http://192.168.3.120:18080
+          curl -X POST "https://gh.mxaly.top:16666/api/message" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.OPENCLAW_TOKEN }}" \
             -d "$JSON"
