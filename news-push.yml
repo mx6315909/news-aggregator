@@ -1,17 +1,9 @@
-name: News Push
+name: Test
 
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+on: workflow_dispatch
 
 jobs:
-  push-news:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Send to WhatsApp
-        run: |
-          curl -X POST "https://gh.mxaly.top:18789/api/message" \
-            -H "Content-Type: application/json" \
-            -d '{"channel":"whatsapp","target":"+8613963767577","message":"test"}'
+      - run: echo "Hello"
