@@ -15,7 +15,7 @@ jobs:
       
     - name: Send webhook to server
       run: |
-        curl -X POST "http://gh.mxaly.top:16666/github-webhook" \
+        curl -X POST "https://gh.mxaly.top:16666/github-webhook" \
           -H "Content-Type: application/json" \
           -d '{
             "event": "github_push",
