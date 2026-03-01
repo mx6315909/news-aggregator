@@ -1,4 +1,4 @@
-name: News Push Fixed
+name: News Push
 
 on:
   push:
@@ -13,30 +13,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
       
-    - name: Send notification to WhatsApp
+    - name: Send to WhatsApp
       run: |
-        # 构建消息（使用简单格式）
-        REPO="${{ github.repository }}"
-        ACTOR="${{ github.actor }}"
-        MSG="${{ github.event.head_commit.message }}"
-        TIME="${{ github.event.head_commit.timestamp }}"
-        
-        # 使用 jq 构建 JSON 避免转义问题
-        PAYLOAD=$(jq -n \
-          --arg channel "whatsapp" \
-          --arg target "+8613963767577" \
-          --arg msg "🚀 GitHub 代码更新通知
-
-📦 仓库: $REPO
-👤 提交者: $ACTOR
-📝 提交信息: $MSG
-⏰ 时间: $TIME
-
-🤓 来自你的小弟" \
-          '{channel: $channel, target: $target, message: $msg}')
-        
-        echo "Sending payload: $PAYLOAD"
-        
         curl -X POST "https://gh.mxaly.top:16666/api/message" \
           -H "Content-Type: application/json" \
-          -d "$PAYLOAD"
+          -d '{"channel":"whatsapp","target":"+8613963767577","message":"🚀 GitHub更新\n仓库:${{ github.repository }}\n提交者:${{ github.actor }}\n信息:${{ github.event.head_commit.message }}\n🤓来自你的小弟"}'
