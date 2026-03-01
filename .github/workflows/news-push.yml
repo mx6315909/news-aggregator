@@ -20,22 +20,26 @@ jobs:
           REPO="${{ github.repository }}"
           MSG=$(echo "${{ github.event.head_commit.message }}" | tr -d '"' | tr -d "'")
           
-          # 【核心修改】构造符合 OpenClaw 校验的 GitHub Webhook 格式
+          # 【核心修改】按照文档要求构造 JSON 指令包
+          # 必须包含 message, deliver, channel, to 字段
           JSON=$(jq -n \
-            --arg repo "$REPO" \
-            --arg msg "🚀 GitHub更新\n仓库: $REPO\n信息: $MSG\n🤓来自你的小弟" \
+            --arg msg "🚀 GitHub更新
+          仓库: $REPO
+          信息: $MSG
+          🤓来自你的小弟" \
+            --arg to "+8613963767577" \
             '{
-              repository: { full_name: $repo },
-              head_commit: { message: $msg },
-              pusher: { name: "GitHub Action" }
+              message: $msg,
+              name: "GitHub推送",
+              deliver: true,
+              channel: "whatsapp",
+              to: $to
             }')
           
-          echo "Sending payload to OpenClaw via Lucky (18080)..."
+          echo "Sending Targeted Command to OpenClaw Agent..."
           
-          # 【路径修改】使用实测 200 OK 的路径
-          # 【Header修改】增加 X-GitHub-Event 伪装身份证
-          curl -X POST "https://gh.mxaly.top:16666/github-webhook" \
+          # 使用 /hooks/agent 路径，不再需要 X-GitHub-Event 伪装头
+          curl -X POST "https://gh.mxaly.top:16666/hooks/agent" \
             -H "Content-Type: application/json" \
-            -H "X-GitHub-Event: push" \
             -H "Authorization: Bearer ${{ secrets.OPENCLAW_TOKEN }}" \
             -d "$JSON"
