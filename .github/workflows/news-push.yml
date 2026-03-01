@@ -16,18 +16,26 @@ jobs:
         
       - name: Send to WhatsApp
         run: |
-          # 获取提交信息（去掉换行和引号）
-          RAW_MSG='${{ github.event.head_commit.message }}'
-          MSG=$(echo "$RAW_MSG" | tr '\n' ' ' | sed 's/"/\\\"/g')
+          # 提取变量
+          REPO="${{ github.repository }}"
+          ACTOR="${{ github.actor }}"
+          MSG="${{ github.event.head_commit.message }}"
           
-          REPO='${{ github.repository }}'
-          ACTOR='${{ github.actor }}'
+          # 使用 jq 构建标准的 JSON
+          JSON=$(jq -n \
+            --arg ch "whatsapp" \
+            --arg tg "+8613963767577" \
+            --arg msg "🚀 GitHub更新
+          仓库: $REPO
+          提交者: $ACTOR
+          信息: $MSG
+          🤓来自你的小弟" \
+            '{channel: $ch, target: $tg, message: $msg}')
           
-          # 构建 JSON
-          JSON="{\"channel\":\"whatsapp\",\"target\":\"+8613963767577\",\"message\":\"🚀 GitHub更新\n仓库: $REPO\n提交者: $ACTOR\n信息: $MSG\n🤓来自你的小弟\"}"
+          echo "Sending payload..."
           
-          echo "Sending: $JSON"
-          
-          curl -X POST "https://gh.mxaly.top:16666/api/message" \
+          # 加上了 -H "Authorization: Bearer ..." 这一行
+          curl -X POST "https://gh.mxaly.top:16666/webhook" \
             -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.OPENCLAW_TOKEN }}" \
             -d "$JSON"
