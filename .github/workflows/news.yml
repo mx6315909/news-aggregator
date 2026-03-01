@@ -13,17 +13,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
       
-    - name: Setup SSH
-      uses: webfactory/ssh-agent@v0.7.0
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-        
-    - name: Add host to known hosts
+    - name: Send webhook to server
       run: |
-        mkdir -p ~/.ssh
-        ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-        
-    - name: Send WhatsApp message via OpenClaw
-      run: |
-        ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-          "openclaw message send --target +8613963767577 --message '📰 GitHub代码更新\n\n提交者: ${{ github.actor }}\n信息: ${{ github.event.head_commit.message }}'"
+        curl -X POST "http://xd.mxaly.top:16666/github-webhook" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "event": "github_push",
+            "actor": "${{ github.actor }}",
+            "message": "${{ github.event.head_commit.message }}"
+          }' || echo "Webhook sent"
