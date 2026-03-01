@@ -12,6 +12,6 @@ jobs:
       - uses: actions/checkout@v3
       - name: Send to WhatsApp
         run: |
-          curl -X POST "https://gh.mxaly.top:18789/api/message" \
+          curl -X POST "https://gh.mxaly.top:16666/api/message" \
             -H "Content-Type: application/json" \
-            -d '{"channel":"whatsapp","target":"+8613963767577","message":"test"}'
+            -d '{"channel":"whatsapp","target":"+8613963767577","message":"🚀 GitHub更新\n仓库:${{ github.repository }}\n提交者:${{ github.actor }}\n信息:${{ github.event.head_commit.message }}"}'
